@@ -1,11 +1,13 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.loaded_matchparen = 1
+vim.opt.clipboard = 'unnamedplus'
 require 'core.options' -- Load general options
 require 'core.snippets' -- Custom code snippets
 require 'core.keymaps'
 require 'core.dir-watcher'
 require 'core.hotreload'
+require 'core.autoreload'
 require 'tools.sql-runner'
 require 'tools.wezterm-img-preview'
 
@@ -24,13 +26,14 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Import color theme based on environment variable NVIM_THEME
-local default_color_scheme = 'nord'
+local default_color_scheme = 'kanagawa'
 local env_var_nvim_theme = os.getenv 'NVIM_THEME' or default_color_scheme
 
 -- Define a table of theme modules
 local themes = {
   nord = 'plugins.themes.nord',
   onedark = 'plugins.themes.onedark',
+  kanagawa = 'plugins.themes.kanagawa',
 }
 
 -- Setup plugins
@@ -60,6 +63,8 @@ require('lazy').setup({
   require 'plugins.render-markdown',
   require 'plugins.dirdiff',
   require 'plugins.laravel',
+  require 'plugins.tmux-navigator',
+  require 'plugins.goto-preview',
 }, {
   ui = {
     -- If you have a Nerd Font, set icons to an empty table which will use the
@@ -93,6 +98,8 @@ local function file_exists(file)
   end
 end
 
+vim.opt.clipboard = 'unnamedplus'
+
 -- Path to the session file
 local session_file = '.session.vim'
 
@@ -101,6 +108,8 @@ if file_exists(session_file) then
   -- Source the session file
   vim.cmd('source ' .. session_file)
 end
+
+vim.opt.guicursor = 'n-v-c:block,i-ci-ve:block,r-cr:hor20,o:hor50'
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
