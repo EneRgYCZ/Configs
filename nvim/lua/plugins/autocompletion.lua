@@ -70,7 +70,48 @@ return { -- Autocompletion
       mapping = cmp.mapping.preset.insert {
         ['<C-j>'] = cmp.mapping.select_next_item(), -- Select the [n]ext item
         ['<C-k>'] = cmp.mapping.select_prev_item(), -- Select the [p]revious item
-        ['<CR>'] = cmp.mapping.confirm { select = true }, -- Accept the completion with Enter.
+        ['<CR>'] = cmp.mapping(function(fallback)
+          if not cmp.visible() then
+            fallback()
+            return
+          end
+
+          local entry = cmp.get_selected_entry()
+          if not entry then
+            cmp.confirm({ select = true, behavior = cmp.ConfirmBehavior.Replace })
+            return
+          end
+
+          -- Snapshot the item before confirming — cmp may clear it after insertion.
+          local item = vim.deepcopy(entry:get_completion_item())
+          local bufnr = vim.api.nvim_get_current_buf()
+
+          cmp.confirm({ select = true, behavior = cmp.ConfirmBehavior.Replace })
+
+          -- If additionalTextEdits were already on the item at confirm time, nvim-cmp's
+          -- built-in LSP confirm already applied them — don't double-apply.
+          if item.additionalTextEdits and #item.additionalTextEdits > 0 then return end
+
+          -- Slow path: phpactor only ships additionalTextEdits via completionItem/resolve,
+          -- not in the initial list. If the item wasn't pre-resolved before confirm, nvim-cmp
+          -- couldn't apply them, so we request resolve ourselves and apply the result.
+          if entry.source.name ~= 'nvim_lsp' then return end
+          for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+            if client:supports_method('completionItem/resolve') then
+              client:request('completionItem/resolve', item, function(err, resolved)
+                if err or not resolved or not resolved.additionalTextEdits then return end
+                vim.schedule(function()
+                  vim.lsp.util.apply_text_edits(
+                    resolved.additionalTextEdits,
+                    bufnr,
+                    client.offset_encoding or 'utf-8'
+                  )
+                end)
+              end, bufnr)
+              return
+            end
+          end
+        end, { 'i' }), -- Accept the completion with Enter.
         ['<C-c>'] = cmp.mapping.complete {}, -- Manually trigger a completion from nvim-cmp.
 
         -- Think of <c-l> as moving to the right of your snippet expansion.

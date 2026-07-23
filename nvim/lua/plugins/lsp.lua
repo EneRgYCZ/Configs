@@ -30,7 +30,22 @@ return {
     'hrsh7th/cmp-nvim-lsp',
   },
   config = function()
+    vim.diagnostic.config {
+      virtual_text = false,
+      signs = true,
+      underline = true,
+      update_in_insert = false,
+      float = {
+        border = 'rounded',
+        source = true,
+        header = '',
+        prefix = '',
+        max_width = 80,
+      },
+    }
+
     vim.api.nvim_create_autocmd('LspAttach', {
+
       group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
       -- Create a function that lets us more easily define mappings specific LSP related items.
       -- It sets the mode, buffer and description for us each time.
@@ -43,6 +58,8 @@ return {
         --  This is where a variable was first declared, or where a function is defined, etc.
         --  To jump back, press <C-T>.
         map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+
+        map('<leader>e', vim.diagnostic.open_float, 'Show [E]rror float')
 
         -- Find references for the word under your cursor.
         map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
@@ -202,13 +219,23 @@ return {
       gopls = {},
       docker_compose_language_service = {},
       phpactor = {},
-      pest_language_server = {},
       -- tailwindcss = {},
       -- graphql = {},
       html = { filetypes = { 'html', 'twig', 'hbs' } },
       -- cssls = {},
       -- ltex = {},
       -- texlab = {},
+      harper_ls = {
+        filetypes = { 'markdown', 'text', 'gitcommit', 'tex', 'typst' },
+        settings = {
+          ['harper-ls'] = {
+            linters = {
+              SentenceCapitalization = false,
+              SpellCheck = false,
+            },
+          },
+        },
+      },
     }
 
     -- Ensure the servers and tools above are installed

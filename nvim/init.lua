@@ -1,12 +1,9 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.loaded_matchparen = 1
-vim.opt.clipboard = 'unnamedplus'
 require 'core.options' -- Load general options
 require 'core.snippets' -- Custom code snippets
 require 'core.keymaps'
-require 'core.dir-watcher'
-require 'core.hotreload'
 require 'core.autoreload'
 require 'tools.sql-runner'
 require 'tools.wezterm-img-preview'
@@ -59,7 +56,7 @@ require('lazy').setup({
   -- require 'plugins.harpoon',
   -- require 'plugins.avante',
   -- require 'plugins.aerial',
-  require 'plugins.vim-tmux-navigator',
+  require 'plugins.image',
   require 'plugins.render-markdown',
   require 'plugins.dirdiff',
   require 'plugins.laravel',
@@ -97,8 +94,6 @@ local function file_exists(file)
     return false
   end
 end
-
-vim.opt.clipboard = 'unnamedplus'
 
 -- Path to the session file
 local session_file = '.session.vim'
