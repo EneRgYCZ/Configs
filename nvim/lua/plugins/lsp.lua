@@ -216,12 +216,48 @@ return {
       yamlls = {},
       bashls = {},
       dockerls = {},
-      gopls = {},
+      -- gopls built by `go install golang.org/x/tools/gopls@latest`, not Mason.
+      -- gopls must be built with a Go version >= the `go` line in go.mod, otherwise
+      -- it can not load the packages and completion stops working.
+      -- Rebuild after each Go upgrade: go install golang.org/x/tools/gopls@latest
+      gopls = {
+        cmd = { vim.fn.expand '~/go/bin/gopls' },
+      },
+      clangd = {
+        cmd = {
+          'clangd',
+          '--background-index', -- index whole project so symbols from unopened headers show in completion
+          '--all-scopes-completion', -- suggest symbols not yet visible in current scope
+          '--header-insertion=iwyu', -- add missing #include when completion item is accepted
+          '--header-insertion-decorators', -- mark items that will insert an #include
+          '--completion-style=detailed',
+          '--clang-tidy',
+          '--fallback-style=llvm',
+        },
+      },
+      neocmake = {},
       docker_compose_language_service = {},
       phpactor = {},
       -- tailwindcss = {},
       -- graphql = {},
       html = { filetypes = { 'html', 'twig', 'hbs' } },
+      -- Vue support is split across two servers: ts_ls handles <script> (via the
+      -- @vue/typescript-plugin loaded from vue-language-server's own install), and
+      -- vue_ls handles <template>/<style> and forwards TS requests to ts_ls.
+      -- See https://github.com/vuejs/language-tools/wiki/Neovim
+      ts_ls = {
+        filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
+        init_options = {
+          plugins = {
+            {
+              name = '@vue/typescript-plugin',
+              location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
+              languages = { 'vue' },
+            },
+          },
+        },
+      },
+      vue_ls = {},
       -- cssls = {},
       -- ltex = {},
       -- texlab = {},
@@ -239,7 +275,9 @@ return {
     }
 
     -- Ensure the servers and tools above are installed
-    local ensure_installed = vim.tbl_keys(servers or {})
+    local ensure_installed = vim.tbl_filter(function(name)
+      return name ~= 'gopls' -- installed with `go install`, see above
+    end, vim.tbl_keys(servers or {}))
     vim.list_extend(ensure_installed, {
       'stylua', -- Used to format Lua code
     })

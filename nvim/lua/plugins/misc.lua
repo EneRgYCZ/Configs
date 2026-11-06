@@ -3,6 +3,7 @@ return {
   {
     -- autoclose tags
     'windwp/nvim-ts-autotag',
+    opts = {},
   },
   {
     -- detect tabstop and shiftwidth automatically

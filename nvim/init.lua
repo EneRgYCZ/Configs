@@ -60,6 +60,8 @@ require('lazy').setup({
   require 'plugins.render-markdown',
   require 'plugins.dirdiff',
   require 'plugins.laravel',
+  require 'plugins.flutter',
+  require 'plugins.cpp',
   require 'plugins.tmux-navigator',
   require 'plugins.goto-preview',
 }, {

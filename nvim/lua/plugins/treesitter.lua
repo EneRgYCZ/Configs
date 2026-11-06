@@ -28,6 +28,8 @@ return {
       'yaml',
       'make',
       'cmake',
+      'c',
+      'cpp',
       'markdown',
       'markdown_inline',
       'bash',
@@ -35,6 +37,8 @@ return {
       'css',
       'html',
       'php',
+      'vue',
+      'dart',
     }
 
     -- Enable treesitter highlighting and indentation for all filetypes
